@@ -24,16 +24,16 @@ class Board extends React.Component {
   renderBoard() {
     let rows = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let row = 0; row < 3; row++) {
       let children = [];
 
-      for (let j = 0; j < 3; j++) {
-        let square = this.renderSquare(i * 3 + j);
+      for (let col = 0; col < 3; col++) {
+        let square = this.renderSquare(row * 3 + col);
         children.push(square);
       }
 
       rows.push(
-        <div className="board-row" key={i}>
+        <div className="board-row" key={row}>
           {children}
         </div>
       );
