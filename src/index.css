@@ -33,6 +33,10 @@ ul {
   width: 34px;
 }
 
+.winner {
+  background: lightblue;
+}
+
 .square:focus {
   outline: none;
 }

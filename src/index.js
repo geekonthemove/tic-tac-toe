@@ -4,19 +4,23 @@ import "./index.css";
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
+    <button
+      className={"square" + (props.winner ? " winner" : "")}
+      onClick={props.onClick}
+    >
+      {props.sign}
     </button>
   );
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
+  renderSquare(i, winner) {
     return (
       <Square
-        value={this.props.squares[i]}
+        sign={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
         key={i}
+        winner={winner}
       />
     );
   }
@@ -28,7 +32,19 @@ class Board extends React.Component {
       let children = [];
 
       for (let col = 0; col < 3; col++) {
-        let square = this.renderSquare(row * 3 + col);
+        let index = row * 3 + col;
+        let winner = false;
+        const winningLine = this.props.winningLine;
+
+        if (winningLine) {
+          for (let line = 0; line < winningLine.length; line++) {
+            if (winningLine[line] === index) {
+              winner = true;
+            }
+          }
+        }
+
+        let square = this.renderSquare(index, winner);
         children.push(square);
       }
 
@@ -57,7 +73,7 @@ class Game extends React.Component {
           move: {
             col: null,
             row: null,
-            value: null
+            sign: null
           }
         }
       ],
@@ -82,7 +98,7 @@ class Game extends React.Component {
           squares: squares,
           col: (i % 3) + 1,
           row: Math.ceil((i + 1) / 3),
-          value: squares[i]
+          sign: squares[i]
         }
       ]),
       stepNumber: history.length,
@@ -105,7 +121,7 @@ class Game extends React.Component {
       const desc = move ? "Got to move # " + move : "Go to game start";
       const selected = move === this.state.stepNumber;
       const location = move
-        ? "Col: " + step.col + " Row: " + step.row + " Move: " + step.value
+        ? "Col: " + step.col + " Row: " + step.row + " Move: " + step.sign
         : "";
 
       return (
@@ -121,8 +137,10 @@ class Game extends React.Component {
     });
 
     let status;
+    let winningLine;
     if (winner) {
-      status = "Winner: " + winner;
+      winningLine = winner.line;
+      status = "Winner: " + winner.sign;
     } else {
       status = "Next player: " + (this.state.xIsNext ? "X" : "O");
     }
@@ -130,7 +148,11 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
+          <Board
+            squares={current.squares}
+            onClick={i => this.handleClick(i)}
+            winningLine={winningLine}
+          />
         </div>
         <div className="game-info">
           <div>{status}</div>
@@ -158,7 +180,7 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return { sign: squares[a], line: lines[i] };
     }
   }
 
